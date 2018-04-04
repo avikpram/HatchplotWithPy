@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import xlrd
 import pandas as pd
-from cycler import cycler
 
 def get_data(filepath, sheet_idx):
   print ("Opening file {0}\n".format(filepath))
@@ -74,17 +73,31 @@ def plot_bar(filepath, worksheet_index, error_bar=False, verbosity=False):
 
   plt.style.use('seaborn-white')
   
-  title_ = title.replace(" ", "_")
+  printAndSave (plt, title, filepath, worksheet_index)
+# plot_bar  
+
+def plot_line(filepath, worksheet_index, error_bar=False, verbosity=False):
+  df, title, xlabel, ylabel = get_data (os.path.normpath(filepath), worksheet_index)
   
+  ax = df.plot(style=['ko-','k*-','k^-','ks-'])
+  ax.set_ylabel(ylabel)
+  ax.set_title(title)
+
+  plt.style.use('seaborn-white')
+  
+  printAndSave (plt, title, filepath, worksheet_index)
+
+
+def printAndSave (plt, title, filepath, worksheet_index):
+
+  title_ = title.replace(" ", "_")  
   filename = os.path.splitext(os.path.basename(filepath))[0]
   plt.savefig("_"+title_+\
               "_"+str(filename)+\
               "_"+str(worksheet_index)+".png", bbox='tight')
 
   plt.show()
-
-  
-# plot_bar  
+# printAndSave
   
 # Call function
 if __name__ == "__main__":
@@ -94,18 +107,30 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   
   parser.add_argument("filepath", help="Enter the data file path")
-  parser.add_argument("-s", "--sheet", dest="sheet_num", default=1, \
-                      type=int, help="Worksheet number to use (defaults to 1)")
+
   parser.add_argument("-e", "--errorbar", dest="error_bar", action="store_true",\
                       default=False, help="Show error bars")
+                      
   parser.add_argument("-v", "--verbose", dest="verbosity", action="store_true",\
-                      default=False, help="Prints more information")                        
+                      default=False, help="Prints more information")           
+                      
+  parser.add_argument("-s", "--sheet", dest="sheet_num", default=1, \
+                      type=int, help="Worksheet number to use (defaults to 1)")
+
+  parser.add_argument("-t", "--type", dest="chart_type", default='bar', \
+                      type=str, help="Chart type : bar, line, pie (default is bar)")
                       
   args = parser.parse_args()
 
   try:
-    print ("\nplots bar graph ...\n")
-    plot_bar(args.filepath, args.sheet_num-1, args.error_bar, args.verbosity)
+    if args.chart_type == 'bar':
+      print ("\nPlotting bar graph ...\n")
+      plot_bar(args.filepath, args.sheet_num-1, args.error_bar, args.verbosity)
+    elif args.chart_type == 'line':
+      print ("\nPlotting line graph ...\n")
+      plot_line(args.filepath, args.sheet_num-1, args.error_bar, args.verbosity)
+    else:
+      print ("Chart type {0} not supported\n".format(args.chart_type))
   except:
       print("EXCEPTION")
       traceback.print_exc()
