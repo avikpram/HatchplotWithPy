@@ -78,18 +78,31 @@ def plot_bar(filepath, worksheet_index, error_bar=False, verbosity=False):
 
 def plot_line(filepath, worksheet_index, error_bar=False, verbosity=False):
   df, title, xlabel, ylabel = get_data (os.path.normpath(filepath), worksheet_index)
+
+  print ("\nData:\n {0}".format(df))
   
-  ax = df.plot(style=['ko-','k*-','k^-','ks-'])
+  ncol = len(df.columns)
+  print ("\nNumber of columns = {0}".format(ncol))
+  
+  if error_bar:
+    nrow = int(len(df.index)/2)
+    print("\nNumber of rows (excluding error values) = {0}".format(nrow))
+  else:
+    nrow = len(df.index)
+    print("\nNumber of rows = {0}".format(nrow))
+  
+  ax = df.plot(style=['o-','*-','^-','s-'])
+  
   ax.set_ylabel(ylabel)
   ax.set_title(title)
-
+  ax.set_xticks(df.index)
+  
   plt.style.use('seaborn-white')
   
   printAndSave (plt, title, filepath, worksheet_index)
 
 
 def printAndSave (plt, title, filepath, worksheet_index):
-
   title_ = title.replace(" ", "_")  
   filename = os.path.splitext(os.path.basename(filepath))[0]
   plt.savefig("_"+title_+\
