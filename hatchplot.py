@@ -10,6 +10,7 @@ import pandas as pd
 def get_data(filepath, sheet_idx):
   print ("Opening file {0}\n".format(filepath))
   xl = xlrd.open_workbook(filepath).sheet_by_index(sheet_idx)
+
   cell_0_0 = xl.cell(0, 0).value
   cell_0_1 = xl.cell(0, 1).value
   cell_0_2 = xl.cell(0, 2).value
@@ -24,7 +25,7 @@ def get_data(filepath, sheet_idx):
   
 def plot_bar(filepath, worksheet_index, error_bar=False, verbosity=False):
   df, title, xlabel, ylabel = get_data (os.path.normpath(filepath), worksheet_index)
-  
+
   df = df.T
   print ("\nData:\n {0}".format(df))
   
@@ -105,9 +106,15 @@ def plot_line(filepath, worksheet_index, error_bar=False, verbosity=False):
 def printAndSave (plt, title, filepath, worksheet_index):
   title_ = title.replace(" ", "_")  
   filename = os.path.splitext(os.path.basename(filepath))[0]
-  plt.savefig("_"+title_+\
+  dirname = os.path.dirname(filepath)
+  fullname = dirname+'\\'+\
+              "_"+title_+\
               "_"+str(filename)+\
-              "_"+str(worksheet_index)+".png", bbox='tight')
+              "_"+str(worksheet_index)+".png"
+
+  print("Saving as {0}".format(fullname))
+
+  plt.savefig(fullname, bbox='tight')
 
   plt.show()
 # printAndSave
@@ -135,16 +142,19 @@ if __name__ == "__main__":
                       
   args = parser.parse_args()
 
-  try:
-    if args.chart_type == 'bar':
-      print ("\nPlotting bar graph ...\n")
-      plot_bar(args.filepath, args.sheet_num-1, args.error_bar, args.verbosity)
-    elif args.chart_type == 'line':
-      print ("\nPlotting line graph ...\n")
-      plot_line(args.filepath, args.sheet_num-1, args.error_bar, args.verbosity)
-    else:
-      print ("Chart type {0} not supported\n".format(args.chart_type))
-  except:
-      print("EXCEPTION")
-      traceback.print_exc()
+  if not os.path.isfile(args.filepath):
+    print("Input file not found !!!")
+  else:
+    try:
+      if args.chart_type == 'bar':
+        print ("\nPlotting bar graph ...\n")
+        plot_bar(args.filepath, args.sheet_num-1, args.error_bar, args.verbosity)
+      elif args.chart_type == 'line':
+        print ("\nPlotting line graph ...\n")
+        plot_line(args.filepath, args.sheet_num-1, args.error_bar, args.verbosity)
+      else:
+        print ("Chart type {0} not supported\n".format(args.chart_type))
+    except:
+        print("EXCEPTION")
+        traceback.print_exc()
 # Done
